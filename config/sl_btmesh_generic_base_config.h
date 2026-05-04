@@ -114,7 +114,7 @@
 // <q SL_BTMESH_GENERIC_ON_OFF_CLIENT_INIT_CFG_VAL> Generic On/Off Client
 // <i> Default: 0
 // <i> Initialize Generic On/Off Client.
-#define SL_BTMESH_GENERIC_ON_OFF_CLIENT_INIT_CFG_VAL                   0
+#define SL_BTMESH_GENERIC_ON_OFF_CLIENT_INIT_CFG_VAL                   1
 
 // <q SL_BTMESH_GENERIC_LEVEL_CLIENT_INIT_CFG_VAL> Generic Level Client
 // <i> Default: 0

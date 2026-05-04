@@ -48,15 +48,50 @@
     </characteristic>
   </service>
 
-  <!--Sensor-->
-  <service advertise="false" name="Sensor" requirement="mandatory" sourceId="" type="primary" uuid="7c3b9af1-e42d-568f-3ca1-4b22d79e056a">
+  <!--Sensor Mesh-->
+  <service advertise="false" name="Sensor Mesh" requirement="mandatory" sourceId="" type="primary" uuid="7c3b9af1-e42d-568f-3ca1-4b22d79e056a">
 
-    <!--temp-->
-    <characteristic const="false" id="temp" name="temp" sourceId="" uuid="517800a2-f21c-45f1-ba2e-b15542a37fda">
+    <!--Temperature-->
+    <characteristic const="false" id="temp" name="Temperature" sourceId="" uuid="517800a2-f21c-45f1-ba2e-b15542a37fda">
       <value length="2" type="hex" variable_length="false">00</value>
       <properties>
         <read authenticated="true" bonded="false" encrypted="true"/>
         <notify authenticated="true" bonded="false" encrypted="true"/>
+      </properties>
+    </characteristic>
+
+    <!--LED State-->
+    <characteristic const="false" id="led_state" name="LED State" sourceId="" uuid="67b20acf-84fc-4930-b13b-b44ee051a0af">
+      <value length="1" type="hex" variable_length="false">00</value>
+      <properties>
+        <write authenticated="true" bonded="false" encrypted="true"/>
+      </properties>
+    </characteristic>
+
+    <!--Temperature Period-->
+    <characteristic const="false" id="temp_period_ms" name="Temperature Period" sourceId="" uuid="2edd6e29-52bf-46b0-b51b-540f6b7f1007">
+      <description>In ms</description>
+      <value length="4" type="hex" variable_length="false">00000000</value>
+      <properties>
+        <write authenticated="true" bonded="false" encrypted="true"/>
+      </properties>
+    </characteristic>
+
+    <!--Light-->
+    <characteristic const="false" id="light" name="Light" sourceId="" uuid="fb686e02-fcfc-4ae7-825f-c2a32024c473">
+      <value length="2" type="hex" variable_length="false">0000</value>
+      <properties>
+        <read authenticated="true" bonded="false" encrypted="true"/>
+        <notify authenticated="true" bonded="false" encrypted="true"/>
+      </properties>
+    </characteristic>
+
+    <!--Light Period-->
+    <characteristic const="false" id="light_period_ms" name="Light Period" sourceId="" uuid="1848ee0e-444b-40b1-8fde-054c3ca1559e">
+      <description>In ms</description>
+      <value length="4" type="hex" variable_length="false">00000000</value>
+      <properties>
+        <write authenticated="true" bonded="false" encrypted="true"/>
       </properties>
     </characteristic>
   </service>

@@ -45,9 +45,10 @@
 #define ELEMENT_INDEX            0
 #endif
 
-#ifndef MODEL_ID
-#define MODEL_ID                0x1002
-#endif
+#define GENERIC_LEVEL_CLIENT 0x1003
+#define GENERIC_ON_OFF_SERVER 0x1000
+#define TEMP_ELEMENT 1
+#define LIGHT_ELEMENT 2
 
 #include "sl_btmesh_api.h"
 #include "sl_bt_api.h"
@@ -264,8 +265,27 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
     
     //triggered when central writes to attribute
     case sl_bt_evt_gatt_server_attribute_value_id:
+    {
+      sl_bt_evt_gatt_server_attribute_value_t * pkt = &(evt->data.evt_gatt_server_attribute_value);
+      switch(pkt->attribute)
+      {
+        case gattdb_led_state: //update all led's
+          printf("new state for LED received via GATT: %d\r\n", pkt->value.data[0]);
+          sl_btmesh_generic_client_publish(ELEMENT_INDEX, 0x1001, 0, 0, 0, 0, SL_BTMESH_GENERIC_CLIENT_STATE_ON_OFF, pkt->value.len, pkt->value.data);
+          break;
+        case gattdb_temp_period_ms:
+
+          break;
+        case gattdb_light_period_ms:
+          
+          break;
+        default:
+          break;
+      }
       break;
-    
+    }
+
+
     //triggered when bonding/pairing complete
     case sl_bt_evt_sm_bonded_id:
         printf("Pairing process completed\r\n");
@@ -311,7 +331,6 @@ void sl_btmesh_on_event(sl_btmesh_msg_t *evt)
 
     case sl_btmesh_evt_node_provisioned_id:
       printf("Node provisioned\r\n");
-      // app_assert_status(sc);
       break;    
 
     case sl_btmesh_evt_generic_server_client_request_id:
@@ -320,7 +339,7 @@ void sl_btmesh_on_event(sl_btmesh_msg_t *evt)
       sl_btmesh_evt_generic_server_client_request_t * pkt = &(evt->data.evt_generic_server_client_request);
       switch(pkt->model_id)
       {
-        case 0x1000: // Generic On Off Server
+        case GENERIC_ON_OFF_SERVER: // Generic On Off Server
           //update local model state
           sl_btmesh_generic_server_update(pkt->elem_index, pkt->model_id, 0, pkt->type, pkt->parameters.len, pkt->parameters.data);
           
@@ -333,20 +352,30 @@ void sl_btmesh_on_event(sl_btmesh_msg_t *evt)
       break;
     }
 
-    //event triggered when sending level to group that this model is subscribed to
+    //event triggered when data is published to group that our clients are subscribed to
+    //code assumes only generic level models
+    //differentiates which one based on element
     case sl_btmesh_evt_generic_client_server_status_id:
     {
       printf("Received server status for Generic Client model\r\n");
       sl_btmesh_evt_generic_client_server_status_t * pkt = &(evt->data.evt_generic_client_server_status);
-      switch(pkt->model_id)
+      switch(pkt->elem_index)
       {
-        case 0x1003: // Generic Level Client
+        case TEMP_ELEMENT:
           uint16_t temp_reading = (uint16_t)pkt->parameters.data[0] | ((uint16_t)pkt->parameters.data[1] << 8);
           printf("Temperature reading: %d\r\n", temp_reading);
 
           //echo received value to gattdb, notify wifi board
           sl_bt_gatt_server_write_attribute_value(gattdb_temp, 0, pkt->parameters.len, pkt->parameters.data);
           sl_bt_gatt_server_notify_all(gattdb_temp, pkt->parameters.len, pkt->parameters.data);
+          break;
+        case LIGHT_ELEMENT:
+          uint16_t light_reading = (uint16_t)pkt->parameters.data[0] | ((uint16_t)pkt->parameters.data[1] << 8);
+          printf("Light reading: %d\r\n", light_reading);
+
+          //echo received value to gattdb, notify wifi board
+          sl_bt_gatt_server_write_attribute_value(gattdb_light, 0, pkt->parameters.len, pkt->parameters.data);
+          sl_bt_gatt_server_notify_all(gattdb_light, pkt->parameters.len, pkt->parameters.data);
           break;
         default:
           break;
