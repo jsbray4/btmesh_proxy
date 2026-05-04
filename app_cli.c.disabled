@@ -1,0 +1,174 @@
+// app_cli.c
+#include "sl_cli.h"
+#include "sl_bt_api.h"
+#include "app_assert.h"
+#include "app.h"
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+// -----------------------------------------------------------------------------
+// Externs / globals from your application
+// -----------------------------------------------------------------------------
+extern volatile conn_state_t conn_state;
+extern uint8_t connection_handle;
+extern uint32_t service_handle;
+extern uint16_t characteristic_handle;
+#define SL_CLI_CHAT_BUFFER_SIZE 50 
+#define NAME                          "Jesse: " //prepended to peripheral messages
+//erase current line, may not produce desired effects in all terminals, used for macos native terminal
+#define REMOVE_PREV_LINE            "\x1B[2K"  
+
+// -----------------------------------------------------------------------------
+// Command Handlers
+// -----------------------------------------------------------------------------
+
+
+//set bonding mode
+static void cmd_bondable(sl_cli_command_arg_t *arguments)
+{
+    int value = sl_cli_get_argument_int8(arguments, 0);
+
+    if (value != 0 && value != 1) {
+        printf("Invalid argument value. Use 0 (disable) or 1 (enable)\r\n");
+        return;
+    }
+
+    sl_status_t sc = sl_bt_sm_set_bondable_mode(value);
+
+    if (sc != SL_STATUS_OK) {
+        printf("Failed to set bondable mode (0x%04X)\r\n", sc);
+        return;
+    }
+    if(value)
+        printf("Bonding enabled successfully\r\n");
+    else
+        printf("Bonding disabled successfully\r\n");
+}
+
+//erase bonds
+static void cmd_erase(sl_cli_command_arg_t *arguments)
+{
+    sl_status_t sc = sl_bt_sm_delete_bondings();
+    if(sc != SL_STATUS_OK)
+    {
+        printf("Bonds failed to erase\r\n");
+    }
+    else
+        printf("Bonds successfully erased\r\n");
+
+}
+
+//disconnect from peripheral
+static void cmd_dc(sl_cli_command_arg_t *arguments)
+{
+    if(connection_handle != CONNECTION_HANDLE_INVALID) {
+      sl_bt_connection_close(connection_handle);
+    }
+    else{
+      printf("Cannot disconnect: not connected\r\n");
+    }
+}
+
+//print menu
+static void cmd_menu(sl_cli_command_arg_t *arguments)
+{
+    (void)arguments;
+    // print_menu();
+}
+
+//verify bonding/pairing
+static void cmd_verify(sl_cli_command_arg_t *arguments)
+{
+    sl_status_t sc;
+
+    if (conn_state != passkey) {
+        printf("No passkey to verify\r\n");
+        return;
+    }
+
+    int value = sl_cli_get_argument_int8(arguments, 0);
+
+    //passkey
+    //must be exactly 6 digits
+    if (value < 3 || value > 9) {
+        printf("Invalid passkey. Must be a digit from 3-9.\r\n");
+        return;
+    }
+
+    //enter passkey
+    sc = sl_bt_sm_enter_passkey(connection_handle, value);
+    if (sc != SL_STATUS_OK) {
+        printf("Failed to enter passkey (0x%02X)\r\n", sc);
+        return;
+    }
+    printf("Passkey %d entered\r\n", value);
+
+}
+
+// -----------------------------------------------------------------------------
+// Command Info (metadata)
+// -----------------------------------------------------------------------------
+// static const sl_cli_command_info_t cmd_scan_info =
+//     SL_CLI_COMMAND(cmd_scan, "Start scanning", "", { SL_CLI_ARG_END });
+
+// static const sl_cli_command_info_t cmd_security_info =
+//     SL_CLI_COMMAND(cmd_security,
+//                    "Set security mode",
+//                    "passkey | numeric",
+//                    { SL_CLI_ARG_STRING, SL_CLI_ARG_END });
+
+// static const sl_cli_command_info_t cmd_bondable_info =
+//     SL_CLI_COMMAND(cmd_bondable,
+//                    "Allow/reject new bondings",
+//                    "0 = reject, 1 = allow",
+//                    { SL_CLI_ARG_INT8, SL_CLI_ARG_END });
+
+static const sl_cli_command_info_t cmd_erase_info =
+    SL_CLI_COMMAND(cmd_erase, "Delete bondings", "", { SL_CLI_ARG_END });
+
+static const sl_cli_command_info_t cmd_dc_info =
+    SL_CLI_COMMAND(cmd_dc, "Disconnect connection", "", { SL_CLI_ARG_END });
+
+// static const sl_cli_command_info_t cmd_chat_info =
+//     SL_CLI_COMMAND(cmd_chat, "Send a message", "", { SL_CLI_ARG_WILDCARD,SL_CLI_ARG_END });
+
+static const sl_cli_command_info_t cmd_menu_info =
+    SL_CLI_COMMAND(cmd_menu, "Show command menu", "", { SL_CLI_ARG_END });
+
+// static const sl_cli_command_info_t cmd_verify_info =
+//     SL_CLI_COMMAND(cmd_verify, "Verify passkey", "passkey (1-digit)", { SL_CLI_ARG_INT8, SL_CLI_ARG_END });
+
+
+// -----------------------------------------------------------------------------
+// Command Table
+// -----------------------------------------------------------------------------
+static const sl_cli_command_entry_t app_cli_table[] = {
+    // { "/scan", &cmd_scan_info, false },
+    // { "/security", &cmd_security_info, false },
+    { "/erase", &cmd_erase_info, false },
+    // { "/bondable", &cmd_bondable_info, false },
+    { "/dc", &cmd_dc_info, false },
+    // { "/chat", &cmd_chat_info, false },
+    { "/menu", &cmd_menu_info, false },
+    // { "/verify", &cmd_verify_info, false },
+    { NULL, NULL, false } // terminator
+};
+
+// -----------------------------------------------------------------------------
+// Command Group
+// -----------------------------------------------------------------------------
+sl_cli_command_group_t app_cli_group = {
+    { NULL }, // no parent
+    false,    // visible
+    app_cli_table
+};
+
+// -----------------------------------------------------------------------------
+// CLI Initialization Helper
+// -----------------------------------------------------------------------------
+void app_cli_init(sl_cli_handle_t *cli_handle)
+{
+    //cli initialization, call from app.c
+    sl_cli_command_add_command_group(*cli_handle, &app_cli_group);
+}

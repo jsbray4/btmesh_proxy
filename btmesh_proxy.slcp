@@ -1,0 +1,151 @@
+# Silicon Labs Project Configuration Tools: slcp, v0, Component selection file.
+project_name: btmesh_proxy
+label: btmesh_proxy
+description: Demonstrates the bare minimum needed for a Bluetooth Mesh C application.
+  The application starts Unprovisioned Device Beaconing after booting, and then waits
+  to be provisioned. This example runs on top of FreeRTOS.
+category: Bluetooth Mesh Examples
+filter:
+- name: Device Type
+  value:
+  - SoC
+- name: Project Difficulty
+  value:
+  - Beginner
+- name: Wireless Technology
+  value:
+  - Bluetooth Mesh
+package: bluetooth_mesh_app
+quality: production
+readme:
+- path: readme_rtos.md
+source:
+- path: app.c
+- path: app_freertos.c
+tag:
+- hwfilter:ram:64k
+- hardware:rf:band:2400
+- hwfilter:device:device_supports_bluetooth
+- hwfilter:flash:512k
+- hardware:device:flash:512
+- hardware:device:ram:64
+include:
+- path: .
+  file_list:
+  - path: app.h
+sdk:
+  vendor: silabs
+  id: simplicity_sdk
+  version: 2025.12.2
+toolchain_settings: [
+  ]
+component:
+- package: simplicity_sdk
+  vendor: silabs
+  id: EFR32MG24B210F1536IM48
+- package: simplicity_sdk
+  vendor: silabs
+  id: app_assert
+- package: simplicity_sdk
+  vendor: silabs
+  id: bluetooth_feature_sm
+- package: simplicity_sdk
+  vendor: silabs
+  id: brd2703a_a02
+- package: simplicity_sdk
+  vendor: silabs
+  id: btmesh_factory_reset
+- package: simplicity_sdk
+  vendor: silabs
+  id: btmesh_generic_base
+- package: simplicity_sdk
+  vendor: silabs
+  id: btmesh_provisionee
+- package: simplicity_sdk
+  vendor: silabs
+  id: btmesh_proxy
+- package: simplicity_sdk
+  vendor: silabs
+  id: btmesh_stack_gatt_prov_bearer
+- package: simplicity_sdk
+  vendor: silabs
+  id: btmesh_stack_generic_client
+- package: simplicity_sdk
+  vendor: silabs
+  id: btmesh_stack_generic_server
+- package: simplicity_sdk
+  vendor: silabs
+  id: btmesh_stack_relay
+- package: simplicity_sdk
+  instance:
+  - inst
+  vendor: silabs
+  id: cli
+- package: simplicity_sdk
+  vendor: silabs
+  id: clock_manager
+- package: simplicity_sdk
+  vendor: silabs
+  id: device_init
+- package: simplicity_sdk
+  vendor: silabs
+  id: freertos
+- package: simplicity_sdk
+  vendor: silabs
+  id: iostream_recommended_stream
+- package: simplicity_sdk
+  vendor: silabs
+  id: iostream_retarget_stdio
+- package: simplicity_sdk
+  vendor: silabs
+  id: mpu
+- package: simplicity_sdk
+  vendor: silabs
+  id: rail_util_pti
+- package: simplicity_sdk
+  instance:
+  - btn0
+  - btn1
+  vendor: silabs
+  id: simple_button
+- package: simplicity_sdk
+  instance:
+  - led0
+  - led1
+  vendor: silabs
+  id: simple_led
+- package: simplicity_sdk
+  vendor: silabs
+  id: sl_main
+- package: simplicity_sdk
+  vendor: silabs
+  id: toolchain_gcc_lto
+other_file:
+- path: readme_img0.png
+- path: readme_img1.png
+- path: readme_img2.png
+- path: readme_img3.png
+- path: readme_img4.png
+- path: readme_img5.png
+configuration:
+- name: EMDRV_DMADRV_DMA_CH_COUNT
+  value: '2'
+- name: NVM3_DEFAULT_NVM_SIZE
+  value: '0x6000'
+- name: SL_BTMESH_CONFIG_MAX_PROV_BEARERS
+  value: '3'
+- condition:
+  - psa_crypto
+  name: SL_PSA_KEY_USER_SLOT_COUNT
+  value: '0'
+- name: SL_BT_RTOS_HOST_STACK_TASK_STACK_SIZE
+  value: '4000'
+- name: SL_BTMESH_PROVISIONEE_AUTO_RESET_DELAY
+  value: '1'
+ui_hints:
+  highlight:
+  - path: config/btconf/gatt_configuration.btconf
+  - path: config/btmeshconf/dcd_config.btmeshconf
+  - path: readme.md
+    focus: true
+
