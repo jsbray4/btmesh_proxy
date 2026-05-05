@@ -71,7 +71,7 @@
     <!--Temperature Period-->
     <characteristic const="false" id="temp_period_ms" name="Temperature Period" sourceId="" uuid="2edd6e29-52bf-46b0-b51b-540f6b7f1007">
       <description>In ms</description>
-      <value length="4" type="hex" variable_length="false">00000000</value>
+      <value length="2" type="hex" variable_length="false">0000</value>
       <properties>
         <write authenticated="true" bonded="false" encrypted="true"/>
       </properties>
@@ -89,7 +89,7 @@
     <!--Light Period-->
     <characteristic const="false" id="light_period_ms" name="Light Period" sourceId="" uuid="1848ee0e-444b-40b1-8fde-054c3ca1559e">
       <description>In ms</description>
-      <value length="4" type="hex" variable_length="false">00000000</value>
+      <value length="2" type="hex" variable_length="false">0000</value>
       <properties>
         <write authenticated="true" bonded="false" encrypted="true"/>
       </properties>

@@ -77,6 +77,9 @@ component:
   vendor: silabs
   id: btmesh_stack_relay
 - package: simplicity_sdk
+  vendor: silabs
+  id: btmesh_stack_vendor_model
+- package: simplicity_sdk
   instance:
   - inst
   vendor: silabs

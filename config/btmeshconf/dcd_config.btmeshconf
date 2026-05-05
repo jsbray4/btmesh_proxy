@@ -36,7 +36,13 @@
             "name": "Generic Level Client"
           }
         ],
-        "vendor_models": []
+        "vendor_models": [
+          {
+            "name": "Sensor Period",
+            "mid": "0x4000",
+            "cid": "0x02ff"
+          }
+        ]
       },
       {
         "name": "Light",
@@ -47,9 +53,25 @@
             "name": "Generic Level Client"
           }
         ],
-        "vendor_models": []
+        "vendor_models": [
+          {
+            "name": "Sensor Period",
+            "mid": "0x4000",
+            "cid": "0x02ff"
+          }
+        ]
       }
     ]
   },
-  "vendor_model_descriptors": []
+  "vendor_model_descriptors": [
+    {
+      "name": "Sensor Period",
+      "mid": "0x4000",
+      "cid": "0x02ff",
+      "multiplicity": "0..*",
+      "element_constraint": "any",
+      "corresponds": [],
+      "extends": []
+    }
+  ]
 }

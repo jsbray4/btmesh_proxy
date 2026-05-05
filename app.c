@@ -49,6 +49,9 @@
 #define GENERIC_ON_OFF_SERVER 0x1000
 #define TEMP_ELEMENT 1
 #define LIGHT_ELEMENT 2
+#define VENDOR_PERIOD 0x4000
+#define VENDOR_ID 0x02ff
+
 
 #include "sl_btmesh_api.h"
 #include "sl_bt_api.h"
@@ -63,6 +66,8 @@ static xQueueHandle light_queue;
 static xQueueHandle blink_queue;
 static xSemaphoreHandle reset;
 static xSemaphoreHandle erase_bonds;
+static uint8_t op_codes [1] = {0};
+
 
 /*******************************************************************************
  * Application Early Init
@@ -267,17 +272,38 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
     case sl_bt_evt_gatt_server_attribute_value_id:
     {
       sl_bt_evt_gatt_server_attribute_value_t * pkt = &(evt->data.evt_gatt_server_attribute_value);
+      uint16_t period;
+      // if (pkt->value.len == 2){
+      //   printf("GATT WRITE: attr=0x%04x len=%d\r\n", pkt->attribute, pkt->value.len);
+      //   uint16_t cccd_value = pkt->value.data[0] | (pkt->value.data[1] << 8);
+      //   if (pkt->attribute == gattdb_temp){
+      //     if (cccd_value == 0x0001)
+      //       printf("TEMP notifications ENABLED\r\n");
+      //     else if (cccd_value == 0x0000)
+      //       printf("TEMP notifications DISABLED\r\n");
+      //   }
+      //   else if (pkt->attribute == gattdb_light){
+      //     if (cccd_value == 0x0001)
+      //       printf("LIGHT notifications ENABLED\r\n");
+      //     else if (cccd_value == 0x0000)
+      //       printf("LIGHT notifications DISABLED\r\n");
+      //   }
+      // }
       switch(pkt->attribute)
       {
         case gattdb_led_state: //update all led's
           printf("new state for LED received via GATT: %d\r\n", pkt->value.data[0]);
           sl_btmesh_generic_client_publish(ELEMENT_INDEX, 0x1001, 0, 0, 0, 0, SL_BTMESH_GENERIC_CLIENT_STATE_ON_OFF, pkt->value.len, pkt->value.data);
           break;
-        case gattdb_temp_period_ms:
-
+        case gattdb_temp_period_ms: //update all temp periods
+          printf("new state for temp period received via GATT\r\n");
+          sl_btmesh_vendor_model_set_publication (TEMP_ELEMENT, VENDOR_ID, VENDOR_PERIOD, 0, 1, pkt->value.len, pkt->value.data);
+          sl_btmesh_vendor_model_publish(TEMP_ELEMENT, VENDOR_ID, VENDOR_PERIOD);
           break;
-        case gattdb_light_period_ms:
-          
+        case gattdb_light_period_ms: //update all light periods
+          printf("new state for light period received via GATT\r\n");
+          sl_btmesh_vendor_model_set_publication (LIGHT_ELEMENT, VENDOR_ID, VENDOR_PERIOD, 0, 1, pkt->value.len, pkt->value.data);
+          sl_btmesh_vendor_model_publish(LIGHT_ELEMENT, VENDOR_ID, VENDOR_PERIOD);
           break;
         default:
           break;
@@ -327,6 +353,10 @@ void sl_btmesh_on_event(sl_btmesh_msg_t *evt)
     ///////////////////////////////////////////////////////////////////////////
     case sl_btmesh_evt_node_initialized_id:
       printf("Node initialized\r\n");
+
+      //init vendor models for periods
+      sl_btmesh_vendor_model_init(TEMP_ELEMENT, VENDOR_ID, VENDOR_PERIOD, 1, 1, op_codes);
+      sl_btmesh_vendor_model_init(LIGHT_ELEMENT, VENDOR_ID, VENDOR_PERIOD, 1, 1, op_codes);
       break;
 
     case sl_btmesh_evt_node_provisioned_id:
@@ -382,6 +412,7 @@ void sl_btmesh_on_event(sl_btmesh_msg_t *evt)
       }
       break;
     }
+
     // -------------------------------
     // Default event handler.
     default:
